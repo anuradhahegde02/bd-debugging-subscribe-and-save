@@ -5,6 +5,7 @@ import com.amazon.ata.debugging.subscribeandsave.test.util.SubscriptionRestorer;
 import com.amazon.ata.debugging.subscribeandsave.types.Subscription;
 
 import org.apache.commons.lang.StringUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ public class SubscriptionServiceTest {
         pass = subscribe_newSubscription_subscriptionReturned();
         pass = getSubscription_existingSubscription_subscriptionReturned() && pass;
         pass = subscribe_unknownCustomer_exceptionOccurs() && pass;
+        pass = subscribe_unknownASIN_exceptionOccurs() && pass;
 
         if (!pass) {
             String errorMessage = "\n/!\\ /!\\ /!\\ The SubscriptionService tests failed. Test aborted. /!\\ /!\\ /!\\";
@@ -116,7 +118,23 @@ public class SubscriptionServiceTest {
         System.out.println("   FAIL: An exception should have occurred when subscribing invalid customer.");
         return false;
     }
+    public boolean subscribe_unknownASIN_exceptionOccurs() {
+        // GIVEN - an invalid ASIN to make a subscription for
+        String customerId = CUSTOMER_ID;
+        String asin = "banana";
+        int frequency = 1;
 
+        // WHEN/THEN - try to create a new subscription, catch UnrecognizedAsinException
+        try {
+            Subscription result = classUnderTest.subscribe(customerId, asin, frequency);
+        } catch (UnrecognizedAsinException w) {
+            System.out.println("  PASS: Cannot subscribe with invalid ASIN.");
+            return true;
+        }
+
+        System.out.println("   FAIL: An exception should have occurred when subscribing invalid ASIN.");
+        return false;
+    }
 
     @BeforeEach
     @AfterEach
